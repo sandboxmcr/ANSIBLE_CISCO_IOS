@@ -1,0 +1,41 @@
+- name: CREATION OF MULTIPLE VLANS
+  hosts: all
+  gather_facts: false
+  connection: local
+#DEFINIR AQUÍ EL CONJUNTO DE VLANS A CREAR, CON EL NOMBRE RESPECTIVO
+  vars : 
+    vlans : {100 : "vlanCien", 200 : "vlanDoscientos",300 : "vlanTrescientos"}
+#Comenzamos a definir los tasks
+  tasks:
+#El primer task permite crear múltiples vlans que especificamos en el diccionario anterior
+   - name: CREAR LAS VLANS
+     cisco.ios.ios_vlan:
+      provider :
+         authorize : yes
+         auth_pass : admin
+      vlan_id: "{{item.key}}"
+      name: "{{item.value}}"
+      state: present
+     with_dict: "{{vlans}}"
+#El segundo task permite ver la configuración de las vlans
+    - name: RECUPERAR LA INFORMACIÓN DE VLANS
+          ios_command:
+            provider :
+            authorize : yes
+            auth_pass : admin
+            commands:
+              - show vlan brief
+          register : VLANS_OUTPUT
+    - debug: 
+            msg : "PARA EL {{inventor}}"
+            var : {{VLANS_OUTPUT}}
+    - name: MOSTRAR LA INFORMACIÓN DE VLANS
+      ios_command:
+          provider :
+              authorize : yes
+              auth_pass : admin
+          commands:
+                - show vlan brief
+      register : VLANS_OUTPUT
+    - debug:
+            var : "{{VLANS_OUTPUT.stdout[0]}}"

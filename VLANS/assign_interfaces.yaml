@@ -1,0 +1,14 @@
+- name: CREATION OF MULTIPLE VLANS
+  hosts: all
+  gather_facts: false
+  connection: local
+#Comenzamos a definir los tasks
+  tasks:
+  - name: ADD VLAN AND ASSIGN INTERFACES
+    cisco.ios.ios_vlan:
+     provider :
+         authorize : yes
+         auth_pass : admin
+     aggregate:
+      - {vlan_id: 100, name: test-vlan, interfaces: [GigabitEthernet0/2, GigabitEthernet0/3]}
+      - {vlan_id: 101, name: test2-vlan, interfaces: GigabitEthernet0/0}
