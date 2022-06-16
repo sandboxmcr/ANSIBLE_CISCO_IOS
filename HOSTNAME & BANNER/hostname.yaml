@@ -7,13 +7,13 @@
   connection: local
   tasks:
     - name: CAMBIAR HOSTNAME DE EQUIPOS
-    cisco.ios.ios_hostname:
-      provider :
+      cisco.ios.ios_hostname:
+       provider :
           authorize : yes
           auth_pass : admin
-      config:
-        hostname: {{inventory_hostname}}
-      state: merged
+       config:
+        hostname: "{{inventory_hostname}}"
+       state: merged
 
 #Si se desea eliminar el hostname de la configuración actual, entonces ejecutar el siguiente task
 

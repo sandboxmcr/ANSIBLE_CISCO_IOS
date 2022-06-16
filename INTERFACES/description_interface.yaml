@@ -1,0 +1,15 @@
+- name: CONFIGURAR DESCRIPCIÓN DE INTERFACES 
+  hosts: switches
+  gather_facts: false
+  tasks:
+   - name: GigabitEthernet1/2
+      description: Configured by Ansible-Network
+      mtu: 2800
+      enabled: true
+      duplex: full
+    - name: GigabitEthernet1/0
+      description: Configured by Ansible-Network
+      mtu: 2800
+      enabled: false
+      speed: 100
+      duplex: full
