@@ -1,0 +1,40 @@
+- name: CONFIGURAR DESCRIPCIÓN DE INTERFACES 
+  hosts: SW1
+  gather_facts: false
+  vars : 
+    inter : ["interface GigabitEthernet3/3","interface GigabitEthernet0/0"]
+  tasks:
+  #PARA SWITCHES DE CAPA 3, PRIMERO HABILITAMOS LAS INTERFACES L2 COMO INTERFACES L3
+  #DEFINIMOS EN LA LISTA SUPERIOR TODAS LAS INTERFACES EN LAS QUE EJECUTAREMOS NO SWITCHPORT
+    - name : NO SWITCHPORT
+      cisco.ios.ios_config:
+        lines :
+         - no switchport
+        parents: "{{item}}"
+      loop : "{{inter}}"
+  #UNA VEZ HABILITADAS LAS INTERFACES L3, SE PROCEDE A DIRECCIONAR
+   #Task para direccionar unicamente una interface
+    - name: Set GigabitEthernet3/3 IPv6 address
+      cisco.ios.ios_l3_interface:
+        name: GigabitEthernet3/3
+        ipv4 : 192.168.20.4/24
+        ipv6: fd5d:12c9:2201:1::1/64
+  #Task para direccionar un conjunto de interfaces a través del atributo "agreggate"
+    - name: Set IP addresses on aggregate
+      cisco.ios.ios_l3_interface:
+       aggregate:
+       #especificaremos cada una de las interface dentro del bloque "aggregate"
+        - name: GigabitEthernet0/0
+          ipv4: 192.168.2.10/24
+          state: present 
+        - name: vlan88
+          ipv4: 192.168.88.10/24
+          ipv6: fd5d:12c9:2201:88::6/64
+          state: present 
+  #ASEGURAMOS EL ESTADO "UP" DE LA LISTA DE INTERFACES QUE SE CONFIGURARON
+    - name : NO SHUTDOWN
+      cisco.ios.ios_config:
+        lines :
+         - no shutdown
+        parents: "{{item}}"
+      loop : "{{inter}}"    
