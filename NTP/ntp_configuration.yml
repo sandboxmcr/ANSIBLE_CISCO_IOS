@@ -1,0 +1,36 @@
+---
+- name: CONFIGURATION NTP SERVER  ## nombre del playbook
+  hosts: routers  ## los hosts que se ejecutaran
+  gather_facts: false
+  connection: network_cli   ## conexion local
+  tasks:
+  ##Configurar el NTP server
+    - name: NTP  ## Nombre de la tarea
+      ios_ntp:
+        server: "{{ item.server }}"  ## servidor ntp
+        source_int: "{{ item.source_int }}" ## (Interfaz de entrada de los paquetes NTP)
+        ##acl: (Si esta asociado a un access list)
+        logging: false  ## habilitar  NTP logs
+        state: present
+      ## si se requiere agregar mas servers seguir con el ejemplo agregando mas diccionarios y en caso se requeire agregar el campo acl, solo aumentar en el dict.
+      loop:
+        - {server: 60.30.20.30, source_int: "FastEthernet0/1" }
+        - {server: 10.40.20.40, source_int: "FastEthernet0/1" }
+      ## comando de verificacion del ntp : show ntp associations
+    - name: verificar configuracion de ntp
+      ios_command:
+          commands:
+            - show ntp associations
+      ## se registra la salida
+      register : output
+     ## imprimimos la salida en la ejecucion
+    - name: mostrar salida
+      debug:
+        msg: "{{ output.stdout_lines[0] }}"
+
+
+
+
+
+
+
