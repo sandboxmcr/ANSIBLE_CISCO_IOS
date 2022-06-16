@@ -24,6 +24,7 @@
     - name: CONFIGURAR EL BANNER DESDE UN ARCHIVO
       cisco.ios.ios_banner:
         banner: motd
+        multiline_delimiter : "/"
         text: "{{ lookup('file', './banner_config/banner.cfg') }}"
         state: present
   
