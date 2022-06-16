@@ -1,0 +1,25 @@
+#El campo 'state' puede ser modificado con los parámetros 'merged', 'replaced' y 'overridden'
+#cualquiera de estos sobreescribirá el hostname especificado en el archivo "hosts"
+
+- name: CONFIGURAR HOSTNAMES A LOS EQUIPOS
+  hosts: all
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: CAMBIAR HOSTNAME DE EQUIPOS
+    cisco.ios.ios_hostname:
+      provider :
+          authorize : yes
+          auth_pass : admin
+      config:
+        hostname: {{inventory_hostname}}
+      state: merged
+
+#Si se desea eliminar el hostname de la configuración actual, entonces ejecutar el siguiente task
+
+#    - name: ELIMINAR EL HOSTNAME ACTUAL
+#    cisco.ios.ios_hostname:
+#      provider :
+#          authorize : yes
+#          auth_pass : admin
+#      state: deleted

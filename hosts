@@ -1,0 +1,35 @@
+SW1 ansible_user=admin ansible_password=admin ansible_host=192.168.122.120
+SW2 ansible_user=admin ansible_password=admin ansible_host=192.168.122.150
+R1 ansible_user=admin ansible_password=admin ansible_host=192.168.122.100
+
+[switches]
+SW1
+SW2
+
+[routers]
+R1
+
+[general:children]
+switches
+routers
+
+[routers:vars]
+ansible_connection = ansible.netcommon.network_cli
+ansible_network_os = cisco.ios.ios
+ansible_become = yes
+ansible_become_method = enable
+ansible_become_password = admin
+
+[switches:vars]
+ansible_connection = ansible.netcommon.network_cli
+ansible_network_os = cisco.ios.ios
+ansible_become = yes
+ansible_become_method = enable
+ansible_become_password = admin
+
+[general:vars]
+ansible_connection = ansible.netcommon.network_cli
+ansible_network_os = cisco.ios.ios
+ansible_become = yes
+ansible_become_method = enable
+ansible_become_password = admin

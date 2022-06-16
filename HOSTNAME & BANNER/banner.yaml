@@ -1,0 +1,31 @@
+#El parámetro host se puede modificar por un grupo específico o host específico
+#según se haya definido en el archivo hosts
+- name: CONFIGURAR BANNER
+  hosts: general
+  gather_facts: false
+  tasks:
+  # Para configurar el login banner, que se visualiza al establecer una sesión remota por Telnet o SSH
+    - name: CONFIGURAR EL LOGIN BANNER USANDO UN DELIMITADOR
+      cisco.ios.ios_banner:
+        banner: login
+        multiline_delimiter: x
+        text: LOGIN BANNER USANDO DELIMITADOR CONFIGURADO DESDE ANSIBLE 
+        state: present
+  # Para configurar un banner motd con multiples lineas
+    - name: CONFIGURAR UN MOTD BANNER CON MÚLTIPLES LÍNEAS
+      cisco.ios.ios_banner:
+        banner: login
+        text: |
+          Este es mi login banner
+          Contiene múltiples lineas 
+          Configurado desde Ansible
+        state: present
+  # Para configurar un banner desde un archivo .cfg
+    - name: CONFIGURAR EL BANNER DESDE UN ARCHIVO
+      cisco.ios.ios_banner:
+        banner: motd
+        text: "{{ lookup('file', './banner_config/banner.cfg') }}"
+        state: present
+  
+#EL PARÁMETRO BANNER SE PUEDE SETEAR A LOS SIGUIENTES VALORES: login, motd, exec e incoming
+#EL PARÁMETRO STATE SE PUEDE SETEAR A LOS SIGUIENTES VALORES: present y absent(para eliminarlo)
