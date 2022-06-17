@@ -1,0 +1,16 @@
+---
+- name: AUTOMATIC BACKUP OF RUNNING-CONFIG
+  hosts: all
+  gather_facts: false
+  connection: network_cli
+  tasks:  # mostramos el contenido del comando 
+    - name: MOSTRAR EL RUNNGING CONFIG
+      ios_command:
+        commands:
+          - show running-config
+      register: config
+    - name: GUARDAR EL RESULTADO
+      copy:
+        content: "{{ config.stdout }}"  ## copiamos el contenido en una variable
+        dest: "backups/show_run_w0_{{ inventory_hostname }}.txt"  # guardamos el documento en una carpeta previamente creada con el nombre
+                                                                  # del hostname
