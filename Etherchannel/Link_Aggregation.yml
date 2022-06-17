@@ -1,0 +1,66 @@
+---
+- name: CREACION DE LINK AGGREGGATION
+  hosts: switches  ## los hosts que se ejecutaran
+  gather_facts: false
+  connection: network_cli   ## conexion por CLI
+  tasks: 
+    - name: Creacion de interfaces portchannel  ## Nombre de la tarea
+      ios_config:
+        lines:
+            - interface port-channel {{ item }} ## creacion de las interfaces port-channel
+      loop:
+        - 10
+        - 20
+        - 30
+    ## se agregaran los puertos a los port-channel creados
+    - name: AGREGACION DE LOS PUERTOS EN EL PORTCHANNEL 
+      block:
+      ## se usa esta tarea para realizar la verifiacion del dispositivo
+        - name: VERIFICAR CONDICION DE HOSTNAME
+          ios_command:
+            commands:
+              - show running-config | include hostname
+          register: output
+      ## se imprime las salidas de la tarea anterior para verificacion
+        - name : imprimir 
+          debug:
+            msg: "{{ output.stdout[0] }}"
+      ## se realiza la configuracion de los equipos 
+        - name: REALIZAR CONFIGURACION PORTCHANNEL EQUIPO S1
+          ios_lag_interfaces:
+            config:
+              - name: 10
+                members:
+                - member: GigabitEthernet0/2
+                  mode: active  ## el estado de los puertos : PAgP: desirable, auto ;  LACP: active, passive ; Static: on
+                - member: GigabitEthernet0/3
+                  mode: active
+              - name: 20
+                members:
+                - member: GigabitEthernet1/0
+                  mode: active
+                - member: GigabitEthernet1/1
+                  mode: active
+            #state: overriden   ## (se usa overriden cuando se requiere borrar toda la configuracion de los estados de los puertos )
+            state: merged  ## (se usa merged cuando se quiere colocara inicialmente las configuraciones )
+          when: output.stdout[0] == "hostname S1" ## verificacion del hostname para ubicar el dispositivo
+        - name: REALIZAR CONFIGURACION PORTCHANNEL EQUIPO S2
+          ios_lag_interfaces:
+            config:
+              - name: 10
+                members:
+                - member: GigabitEthernet0/2
+                  mode: active
+                - member: GigabitEthernet0/3
+                  mode: active
+              - name: 20
+                members:
+                - member: GigabitEthernet1/0
+                  mode: active
+                - member: GigabitEthernet1/1
+                  mode: active
+            #state: overriden
+            state: merged
+          when: output.stdout[0] == "hostname S2" ## verificacion del hostname para ubicar el dispositivo
+
+        
