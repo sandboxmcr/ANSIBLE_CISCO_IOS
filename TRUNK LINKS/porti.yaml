@@ -1,0 +1,60 @@
+- name: CONFIGURAR DESCRIPCIÓN DE INTERFACES 
+  hosts: switches
+  gather_facts: false
+  connection: network_cli   ## conexion por CLI
+  vars:
+    equipos: ## diccionario de equipos 
+      - host: SW1  
+        interfaces:  ## interfaces que modificaras a enlaces troncales  
+         - GigabitEthernet2/0
+         - GigabitEthernet2/1
+        native: 3  ## vlan nativa
+        allowed:   ## que vlans seran permitidas
+         - 20
+         - 30
+         - 10
+      - host: SW2   ## el segundo equipo a modificar
+        interfaces: 
+         - GigabitEthernet3/0
+         - GigabitEthernet3/1
+        native: 3 
+        allowed: 
+         - 20
+         - 30
+         - 10
+  tasks:
+    - name: Agregacion de interfaces a puertos troncales  
+      block: ## bloque de comandos para los enlaces troncales
+        - name: VERIFICAR CONDICION DE HOSTNAME
+          ios_command:
+            commands:  ## se ejecuta un comando para verificacion de hostname
+              - show running-config | include hostname
+          register: output
+
+        - name : imprimir   ## en esta tarea se imprime para la verificación 
+          debug:
+            msg: "{{ (item.0).host }} y {{item.1}} y {{ (item.0).allowed}} "  
+          with_subelements:  ## se usa un bucle del diccionario creado en la sección de vars
+              - "{{equipos}}" ## y el bucle de elementos internos del diccionario INterfaces 
+              - interfaces   
+        - name : imprimir
+          debug:
+            msg: "{{output.stdout[0]}}"
+
+        - name: REALIZAR CONFIGURACION PORTCHANNEL EQUIPO S1 ##  comandos de configuracion de enlaces
+          cisco.ios.ios_l2_interfaces:
+            config:
+              - name: "{{ item.1 }}"  ## el nombre de la interfaz
+                mode: trunk   ## el modo trunk
+                trunk:
+                 native_vlan: "{{(item.0).native }}"  ## vlan nativa
+                 allowed_vlans: "{{ (item.0).allowed}}"  ## que vlan se permiten
+                 encapsulation: dot1q 
+            state: merged
+          vars:
+            hostname : "{{(item.0).host}}"  
+            salida : "{{output.stdout[0]}}" 
+          with_subelements:  ## variables para seleccionar la tarea dependiendo del hostname
+              - "{{equipos}}"
+              - interfaces
+          when:  hostname in salida   ## el condicional 
