@@ -1,0 +1,28 @@
+---
+- name: CREACION DE RUTAS ESTATICAS
+  hosts: routers  ## equipos routers 
+  gather_facts: false
+  connection: network_cli
+  tasks:
+    - name: Merge provided configuration with device configuration
+      cisco.ios.ios_static_routes:  
+        config:
+          - address_families:  ## direcciones de creacion de rutas
+            - afi: ipv4  ## ipv4 o ipv6 
+              routes: 
+              - dest: 20.20.20.0/24  ## las rutas de destino
+                next_hops:
+                - forward_router_address: 10.10.10.1  ## la direccion de siguiente salto
+                  name: merged_blue
+                  tag: 50  ## el taggeo del enlace
+                  track: 150
+            - afi: ipv6    ## ipv4 o ipv6 
+              routes:
+              - dest: 2001:DB8:0:3::/64   ## la ruta de destino
+                next_hops:
+                - forward_router_address: 2001:DB8:0:3::2  ## la direccion de siguiente salto
+                  name: merged_v6  ## el nombre de la ruta
+                  tag: 105   ## el taggeo del enlace
+        state: merged
+
+
